@@ -306,6 +306,8 @@ public:
     // file name of failed reads output
     string failedOut;
     // json file
+    string overlappedOut;
+    // json file
     string jsonFile;
     // html file
     string htmlFile;
@@ -325,6 +327,8 @@ public:
     bool interleavedInput;
     // only process first N reads
     int readsToProcess;
+    // fix the MGI ID tailing issue
+    bool fixMGI;
     // worker thread number
     int thread;
     // trimming options

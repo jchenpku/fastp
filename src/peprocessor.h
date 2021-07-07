@@ -74,13 +74,14 @@ private:
     ofstream* mOutStream1;
     ofstream* mOutStream2;
     UmiProcessor* mUmiProcessor;
-    long* mInsertSizeHist;
+    atomic_long* mInsertSizeHist;
     WriterThread* mLeftWriter;
     WriterThread* mRightWriter;
     WriterThread* mUnpairedLeftWriter;
     WriterThread* mUnpairedRightWriter;
     WriterThread* mMergedWriter;
     WriterThread* mFailedWriter;
+    WriterThread* mOverlappedWriter;
     Duplicate* mDuplicate;
 };
 

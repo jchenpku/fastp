@@ -19,7 +19,7 @@ void HtmlReporter::setDupHist(int* dupHist, double* dupMeanGC, double dupRate) {
     mDupRate = dupRate;
 }
 
-void HtmlReporter::setInsertHist(long* insertHist, int insertSizePeak) {
+void HtmlReporter::setInsertHist(atomic_long* insertHist, int insertSizePeak) {
     mInsertHist = insertHist;
     mInsertSizePeak = insertSizePeak;
 }
@@ -239,7 +239,7 @@ void HtmlReporter::reportInsertSize(ofstream& ofs, int isizeLimit) {
     ofs << " or &gt;" << isizeLimit;
     ofs << ", or contain too much sequencing errors to be detected as overlapped.";
     ofs <<"</div>\n";
-    
+
     ofs << "\n<script type=\"text/javascript\">" << endl;
     string json_str = "var data=[";
 
@@ -268,7 +268,7 @@ void HtmlReporter::reportDuplication(ofstream& ofs) {
     ofs << "<div id='duplication_figure'>\n";
     ofs << "<div class='figure' id='plot_duplication' style='height:400px;'></div>\n";
     ofs << "</div>\n";
-    
+
     ofs << "\n<script type=\"text/javascript\">" << endl;
     string json_str = "var data=[";
 
@@ -351,7 +351,7 @@ void HtmlReporter::report(FilterResult* result, Stats* preStats1, Stats* postSta
     ofs << "<div class='section_title' onclick=showOrHide('after_filtering')><a name='summary'>After filtering</a></div>\n";
     ofs << "<div id='after_filtering'>\n";
 
-    if(postStats1) {  
+    if(postStats1) {
         string name = "read1";
         if(mOptions->merge.enabled)
             name = "merged";
@@ -406,7 +406,10 @@ void HtmlReporter::printCSS(ofstream& ofs){
 }
 
 void HtmlReporter::printJS(ofstream& ofs){
-    ofs << "<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>" << endl;
+    ofs << "<script src='http://opengene.org/plotly-1.2.0.min.js'></script>" << endl;
+    ofs << "\n<script type='text/javascript'>" << endl;
+    ofs << "    window.Plotly || document.write('<script src=\"https://cdn.plot.ly/plotly-1.2.0.min.js\"><\\/script>')" << endl;
+    ofs << "</script>" << endl;
     ofs << "\n<script type=\"text/javascript\">" << endl;
     ofs << "    function showOrHide(divname) {" << endl;
     ofs << "        div = document.getElementById(divname);" << endl;

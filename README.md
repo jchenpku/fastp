@@ -7,23 +7,44 @@ https://badges.debian.net/badges/debian/unstable/fastp/version.svg)](https://pac
 [![Build Status](https://travis-ci.org/OpenGene/fastp.svg?branch=master)](https://travis-ci.org/OpenGene/fastp)
 # fastp
 A tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance. 
-* [features](#features)
-* [simple usage](#simple-usage)
-* [examples of report](#examples-of-report)
-* [download, compile and install](#get-fastp)
-* [input and output](#input-and-output)
-* [filtering by quality, length, complexity, etc.](#filtering)
-* [adapter trimming](#adapters)
-* [per read cutting by quality score](#per-read-cutting-by-quality-score)
-* [base correction for paired end (PE) data](#base-correction-for-pe-data)
-* [globa trimming](#global-trimming)
-* [polyG tail trimming](#polyg-tail-trimming) and [polyX tail trimming](#polyx-tail-trimming)
-* [unique molecular identifier (UMI) processing](#unique-molecular-identifier-umi-processing)
-* [output splitting](#output-splitting)
-* [overrepresented sequence analysis](#overrepresented-sequence-analysis)
-* [merge paired-end reads](#merge-paired-end-reads)
-* [all options](#all-options)
-* [citation](#citation)
+- [fastp](#fastp)
+- [features](#features)
+- [simple usage](#simple-usage)
+- [examples of report](#examples-of-report)
+- [get fastp](#get-fastp)
+  - [install with Bioconda](#install-with-bioconda)
+  - [or download binary (only for Linux systems, http://opengene.org/fastp/fastp)](#or-download-binary-only-for-linux-systems-httpopengeneorgfastpfastp)
+  - [or compile from source](#or-compile-from-source)
+  - [compile from source for windows user with MinGW64-distro](#compile-from-source-for-windows-user-with-mingw64-distro)
+- [input and output](#input-and-output)
+  - [output to STDOUT](#output-to-stdout)
+  - [input from STDIN](#input-from-stdin)
+  - [store the unpaired reads for PE data](#store-the-unpaired-reads-for-pe-data)
+  - [store the reads that fail the filters](#store-the-reads-that-fail-the-filters)
+  - [process only part of the data](#process-only-part-of-the-data)
+  - [do not overwrite exiting files](#do-not-overwrite-exiting-files)
+  - [split the output to multiple files for parallel processing](#split-the-output-to-multiple-files-for-parallel-processing)
+  - [merge PE reads](#merge-pe-reads)
+- [filtering](#filtering)
+  - [quality filter](#quality-filter)
+  - [length filter](#length-filter)
+  - [low complexity filter](#low-complexity-filter)
+  - [Other filter](#other-filter)
+- [adapters](#adapters)
+- [per read cutting by quality score](#per-read-cutting-by-quality-score)
+- [base correction for PE data](#base-correction-for-pe-data)
+- [global trimming](#global-trimming)
+- [polyG tail trimming](#polyg-tail-trimming)
+- [polyX tail trimming](#polyx-tail-trimming)
+- [unique molecular identifier (UMI) processing](#unique-molecular-identifier-umi-processing)
+  - [UMI example](#umi-example)
+- [output splitting](#output-splitting)
+  - [splitting by limiting file number](#splitting-by-limiting-file-number)
+  - [splitting by limiting the lines of each file](#splitting-by-limiting-the-lines-of-each-file)
+- [overrepresented sequence analysis](#overrepresented-sequence-analysis)
+- [merge paired-end reads](#merge-paired-end-reads)
+- [all options](#all-options)
+- [citation](#citation)
 
 # features
 0. comprehensive quality profiling for both before and after filtering data (quality curves, base contents, KMER, Q20/Q30, GC Ratio, duplication, adapter contents...)
@@ -86,6 +107,18 @@ make
 # Install
 sudo make install
 ```
+
+## compile from source for windows user with MinGW64-distro
+
+Get compiler from https://nuwen.net/mingw.html and install as `How to install` section.
+
+```shell
+git clone -b master --depth=1 https://github.com/OpenGene/fastp.git
+cd fastp
+make
+## add fastp to your PATH
+```
+
 `fastp` only relies on `zlib`, which is already available on most Linux-like systems. If you get an error like `undefined reference to gzbuffer` when compiling `fastp`, you may have to update the `zlib` (http://zlib.net)
 
 # input and output
@@ -221,7 +254,7 @@ For Illumina NextSeq/NovaSeq data, `polyG` can happen in read tails since `G` me
 A minimum length can be set with `<poly_g_min_len>` for `fastp` to detect polyG. This value is 10 by default.
 
 # polyX tail trimming
-This feature is similar as polyG tail trimming, but is disabled by default. Use `-x` or `--polyX` to enable it. A minimum length can be set with `<poly_x_min_len>` for `fastp` to detect polyX. This value is 10 by default.   
+This feature is similar as polyG tail trimming, but is disabled by default. Use `-x` or `--trim_poly_x` to enable it. A minimum length can be set with `<poly_x_min_len>` for `fastp` to detect polyX. This value is 10 by default.   
 
 When `polyG tail trimming` and `polyX tail trimming` are both enabled, fastp will perform `polyG trimming` first, then perform `polyX trimming`. This setting is useful for trimming the tails having `polyX (i.e. polyA) ` before `polyG`. `polyG` is usually caused by sequencing artifacts, while `polyA` can be commonly found from the tails of mRNA-Seq reads.
 
@@ -304,8 +337,9 @@ options:
   -I, --in2                          read2 input file name (string [=])
   -O, --out2                           read2 output file name (string [=])
       --unpaired1                      for PE input, if read1 passed QC but read2 not, it will be written to unpaired1. Default is to discard it. (string [=])
-      --unpaired2                      for PE input, if read2 passed QC but read1 not, it will be written to unpaired2. If --unpaired2 is same as --umpaired1 (default mode), both unpaired reads will be written to this same file. (string [=])
+      --unpaired2                      for PE input, if read2 passed QC but read1 not, it will be written to unpaired2. If --unpaired2 is same as --unpaired1 (default mode), both unpaired reads will be written to this same file. (string [=])
       --failed_out                     specify the file to store reads that cannot pass the filters. (string [=])
+      --overlapped_out                 for each read pair, output the overlapped region if it has no any mismatched base. (string [=])
   -m, --merge                          for paired-end input, merge each pair of reads into a single read if they are overlapped. The merged reads will be written to the file given by --merged_out, the unmerged reads will be written to the files specified by --out1 and --out2. The merging mode is disabled by default.
       --merged_out                     in the merging mode, specify the file name to store merged output, or specify --stdout to stream the merged output (string [=])
       --include_unmerged               in the merging mode, write the unmerged or unpaired reads to the file specified by --merge. Disabled by default.
@@ -316,6 +350,7 @@ options:
       --interleaved_in                 indicate that <in1> is an interleaved FASTQ which contains both read1 and read2. Disabled by default.
       --reads_to_process             specify how many reads/pairs to be processed. Default 0 means process all reads. (int [=0])
       --dont_overwrite               don't overwrite existing files. Overwritting is allowed by default.
+      --fix_mgi_id                     the MGI FASTQ ID format is not compatible with many BAM operation tools, enable this option to fix it.
   
   # adapter trimming options
   -A, --disable_adapter_trimming     adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
